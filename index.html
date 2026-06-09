@@ -1,0 +1,2284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Workout Plan.</title>
+  <style>
+    /* ── CSS Variables ─────────────────────────────── */
+    :root {
+      --bg: #f2f2f7;
+      --card: #ffffff;
+      --accent: #007aff;
+      --accent-soft: rgba(0,122,255,0.08);
+      --green: #30d158;
+      --green-soft: rgba(48,209,88,0.1);
+      --red: #ff453a;
+      --text: #1c1c1e;
+      --text2: #8e8e93;
+      --text3: #aeaeb2;
+      --border: rgba(60,60,67,0.1);
+      --input-bg: rgba(118,118,128,0.06);
+      --shadow: 0 0.5px 0 rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.06);
+      --shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
+      --radius: 14px;
+      --radius-sm: 10px;
+      --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+      --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    /* ── Reset & Base ──────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html {
+      -webkit-text-size-adjust: 100%;
+      scroll-behavior: smooth;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      padding-bottom: calc(40px + var(--safe-bottom));
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ── Layout Container (mobile-first: full-width) ─ */
+    .container {
+      width: 100%;
+      padding: 0 16px;
+    }
+
+    /* ── Nav Bar ────────────────────────────────────── */
+    .nav-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.72);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 0.5px solid var(--border);
+      padding: 10px 16px;
+    }
+    .nav-inner {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .week-selector {
+      font-family: var(--font);
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      background: var(--input-bg);
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      cursor: pointer;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238e8e93' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+      transition: background 0.2s var(--ease);
+      min-height: 44px;
+    }
+    .week-selector:focus { background: var(--accent-soft); }
+    .nav-btns {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .nav-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: var(--card);
+      color: var(--text2);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s var(--spring), opacity 0.15s, background 0.15s, color 0.15s;
+      flex-shrink: 0;
+      padding: 0;
+      line-height: 1;
+    }
+    .nav-btn:active { transform: scale(0.9); background: var(--accent); color: #fff; border-color: var(--accent); }\n\n    /* \u2500\u2500 Toggle Switch \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+    .settings-toggle {
+      position: relative;
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .settings-toggle input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .toggle-track {
+      width: 44px;
+      height: 26px;
+      border-radius: 13px;
+      background: var(--text3);
+      display: flex;
+      align-items: center;
+      padding: 2px;
+      transition: background 0.25s var(--ease);
+      cursor: pointer;
+    }
+    .settings-toggle input:checked + .toggle-track {
+      background: var(--green);
+    }
+    .toggle-thumb {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      transition: transform 0.25s var(--spring);
+    }
+    .settings-toggle input:checked + .toggle-track .toggle-thumb {
+      transform: translateX(18px);
+    }
+
+    /* ── Title ──────────────────────────────────────── */
+    .page-title {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      padding: 20px 0 14px;
+    }
+
+    /* ── Day Cards ──────────────────────────────────── */
+    .day-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+      overflow: hidden;
+      transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+    }
+    .day-card:active { transform: scale(0.99); }
+    .day-card.completed {
+      box-shadow: 0 0.5px 0 rgba(0,0,0,0.02);
+    }
+    .day-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      cursor: default;
+      user-select: none;
+      min-height: 56px;
+    }
+    .day-header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+      min-width: 0;
+    }
+    .day-name {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: color 0.25s var(--ease);
+    }
+    .completed-tag {
+      display: none;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--green);
+      white-space: nowrap;
+      background: var(--green-soft);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .day-card.completed .completed-tag { display: inline; }
+    .day-card.completed .day-name { color: var(--text3); text-decoration: line-through; text-decoration-color: var(--text3); }
+    .day-card.completed .day-subtitle { display: none; }
+
+    /* ── Day Subtitle ───────────────────────────────── */
+    .day-subtitle {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text2);
+      letter-spacing: 0.2px;
+      margin-top: 1px;
+    }
+
+    /* ── Checkmark Circle ──────────────────────────── */
+    .check-circle {
+      position: relative;
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .check-circle input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .check-circle .circle {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2.5px solid var(--text3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s var(--spring);
+      background: transparent;
+    }
+    .check-circle .circle svg {
+      width: 14px;
+      height: 14px;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: all 0.2s var(--spring);
+    }
+    .check-circle input:checked + .circle {
+      background: var(--green);
+      border-color: var(--green);
+      transform: scale(1);
+    }
+    .check-circle input:checked + .circle svg {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .check-circle:active .circle { transform: scale(0.85); }
+
+    /* ── Day Content ────────────────────────────────── */
+    .day-content {
+      padding: 0 16px 10px;
+      transition: max-height 0.35s var(--ease), opacity 0.25s var(--ease), padding 0.35s var(--ease);
+      max-height: 2000px;
+      opacity: 1;
+      overflow: hidden;
+    }
+    .day-card.completed .day-content {
+      max-height: 0;
+      opacity: 0;
+      padding: 0 16px;
+    }
+
+    /* ── Exercise Rows ─────────────────────────────── */
+    .exercise-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 0.5px solid var(--border);
+      gap: 8px;
+      min-height: 52px;
+    }
+    .exercise-row:last-child { border-bottom: none; }
+    .exercise-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 0;
+    }
+    .exercise-name {
+      font-size: 15px;
+      font-weight: 400;
+      letter-spacing: -0.1px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .exercise-info-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 1.5px solid var(--accent);
+      background: transparent;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s var(--spring);
+      padding: 0;
+      line-height: 1;
+    }
+    .exercise-info-btn:active {
+      background: var(--accent);
+      color: #fff;
+      transform: scale(0.85);
+    }
+    .exercise-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .rep-settings-btn {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 1.5px solid var(--text3);
+      background: transparent;
+      color: var(--text3);
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      padding: 0;
+      line-height: 1;
+      transition: all 0.15s;
+      margin-left: 2px;
+    }
+    .rep-settings-btn:active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .rep-panel {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: max-height 0.3s var(--ease), opacity 0.2s var(--ease), padding 0.3s var(--ease), margin 0.3s var(--ease);
+      background: var(--input-bg);
+      border-radius: var(--radius-sm);
+      margin: 0;
+      padding: 0 14px;
+    }
+    .rep-panel.open {
+      max-height: 120px;
+      opacity: 1;
+      padding: 10px 14px;
+      margin: 4px 0 6px;
+    }
+    .rep-panel-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .rep-panel-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      white-space: nowrap;
+    }
+    .rep-input {
+      width: 52px;
+      height: 32px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--card);
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 500;
+      text-align: center;
+      color: var(--text);
+      outline: none;
+      -moz-appearance: textfield;
+    }
+    .rep-input::-webkit-inner-spin-button,
+    .rep-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    .rep-input:focus { border-color: var(--accent); }
+    .rep-panel-suffix {
+      font-size: 12px;
+      color: var(--text2);
+      font-weight: 500;
+    }
+    .rep-reset-btn {
+      margin-left: auto;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      transition: opacity 0.15s;
+    }
+    .rep-reset-btn:active { opacity: 0.5; }
+    .prescription {
+      font-size: 13px;
+      color: var(--text2);
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+      min-width: 52px;
+      text-align: right;
+    }
+
+    /* ── Tracking Inputs ───────────────────────────── */
+    .weight-input {
+      width: 80px;
+      height: 38px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--input-bg);
+      font-family: var(--font);
+      font-size: 16px;
+      font-weight: 500;
+      text-align: center;
+      color: var(--text);
+      outline: none;
+      padding: 0 4px;
+      -moz-appearance: textfield;
+      transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+    }
+    .weight-input::-webkit-outer-spin-button,
+    .weight-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .weight-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+    .weight-input::placeholder { color: var(--text3); font-weight: 400; }
+
+    /* ── Calculator Panel ──────────────────────────── */
+    .calc-panel {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: max-height 0.35s var(--ease), opacity 0.25s var(--ease), padding 0.35s var(--ease), margin 0.35s var(--ease);
+      background: var(--input-bg);
+      border-radius: var(--radius-sm);
+      margin: 0;
+      padding: 0 14px;
+    }
+    .calc-panel.open {
+      max-height: 320px;
+      opacity: 1;
+      padding: 14px;
+      margin: 4px 0 8px;
+    }
+    .calc-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 12px;
+    }
+    .calc-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .calc-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      min-width: 50px;
+    }
+    .calc-select, .calc-input {
+      font-family: var(--font);
+      font-size: 15px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      background: var(--card);
+      color: var(--text);
+      padding: 8px 10px;
+      outline: none;
+      min-height: 40px;
+      transition: border-color 0.2s var(--ease);
+    }
+    .calc-select { cursor: pointer; }
+    .calc-select:focus, .calc-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+    .calc-input {
+      width: 56px;
+      text-align: center;
+      -moz-appearance: textfield;
+    }
+    .calc-input::-webkit-outer-spin-button,
+    .calc-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .plate-group {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .plate-label {
+      font-size: 12px;
+      color: var(--text2);
+      font-weight: 600;
+      min-width: 28px;
+    }
+    .calc-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+      padding-top: 10px;
+      border-top: 0.5px solid var(--border);
+    }
+    .calc-total {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+    .calc-apply-btn {
+      font-family: var(--font);
+      font-size: 15px;
+      font-weight: 600;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 10px 22px;
+      cursor: pointer;
+      transition: transform 0.2s var(--spring), opacity 0.15s;
+      min-height: 40px;
+    }
+    .calc-apply-btn:active { transform: scale(0.95); opacity: 0.85; }
+
+    /* ── Modal ──────────────────────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 200;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 0;
+    }
+    .modal-overlay.open {
+      display: flex;
+      animation: fadeIn 0.2s var(--ease);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .modal-card {
+      background: var(--card);
+      border-radius: 20px 20px 0 0;
+      padding: 8px 24px calc(24px + var(--safe-bottom));
+      width: 100%;
+      max-height: 85dvh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+      animation: slideUp 0.35s var(--ease);
+    }
+    .modal-handle {
+      width: 36px;
+      height: 5px;
+      background: var(--text3);
+      border-radius: 3px;
+      margin: 8px auto 16px;
+      opacity: 0.4;
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .modal-title {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: var(--input-bg);
+      color: var(--text2);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s var(--spring);
+    }
+    .modal-close:active { transform: scale(0.85); background: var(--border); }
+    .modal-body { font-size: 15px; line-height: 1.65; color: var(--text); }
+    .modal-body .week-instruction {
+      background: var(--accent-soft);
+      border-radius: var(--radius-sm);
+      border-left: 3px solid var(--accent);
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      font-weight: 500;
+    }
+    .modal-body .cycle-rule {
+      margin-top: 10px;
+      padding: 14px 16px;
+      background: rgba(255,204,0,0.1);
+      border-radius: var(--radius-sm);
+      border-left: 3px solid #ffcc00;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+    .modal-body .cycle-rule strong { color: #997a00; }
+
+    /* ── Master Reset ──────────────────────────────── */
+    .reset-section {
+      padding: 36px 0 calc(28px + var(--safe-bottom));
+      text-align: center;
+    }
+    .reset-btn {
+      font-family: var(--font);
+      font-size: 15px;
+      font-weight: 600;
+      background: transparent;
+      color: var(--red);
+      border: 1.5px solid var(--red);
+      border-radius: var(--radius-sm);
+      padding: 14px 36px;
+      cursor: pointer;
+      transition: all 0.2s var(--spring);
+      min-height: 48px;
+    }
+    .reset-btn:active {
+      background: var(--red);
+      color: #fff;
+      transform: scale(0.96);
+    }
+
+    /* ── Section Divider (Mobility header inside day) ── */
+    .section-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 14px 0 6px;
+      padding-top: 8px;
+    }
+    .section-divider::before,
+    .section-divider::after {
+      content: '';
+      flex: 1;
+      height: 0.5px;
+      background: var(--border);
+    }
+    .section-divider span {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text2);
+      white-space: nowrap;
+    }
+
+    /* ── Mobility Checklist Row ─────────────────────── */
+    .mobility-row {
+      display: flex;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 0.5px solid var(--border);
+      gap: 12px;
+      min-height: 44px;
+    }
+    .mobility-row:last-child { border-bottom: none; }
+    .mobility-check {
+      position: relative;
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .mobility-check input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .mobility-check .m-box {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      border: 2px solid var(--text3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s var(--spring);
+      background: transparent;
+    }
+    .mobility-check .m-box svg {
+      width: 12px;
+      height: 12px;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: all 0.2s var(--spring);
+    }
+    .mobility-check input:checked + .m-box {
+      background: var(--green);
+      border-color: var(--green);
+    }
+    .mobility-check input:checked + .m-box svg {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .mobility-name {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--text);
+      transition: color 0.2s;
+    }
+    .mobility-check input:checked ~ .mobility-name {
+      color: var(--text3);
+      text-decoration: line-through;
+    }
+    .mobility-row .mobility-dur {
+      margin-left: auto;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text2);
+      white-space: nowrap;
+    }
+
+    /* ── OTF / Special Day Cards ────────────────────── */
+    .day-card.otf-card { border-left: 3px solid #f26322; }
+    .day-card.rest-card { border-left: 3px solid var(--green); }
+    .otf-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 4px 0;
+    }
+    .otf-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .otf-field label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text2);
+    }
+    .otf-field input, .otf-field select {
+      width: 100%;
+      height: 40px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--input-bg);
+      font-family: var(--font);
+      font-size: 16px;
+      font-weight: 500;
+      text-align: center;
+      color: var(--text);
+      outline: none;
+      padding: 0 8px;
+      transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+      -moz-appearance: textfield;
+    }
+    .otf-field input::-webkit-outer-spin-button,
+    .otf-field input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .otf-field input:focus, .otf-field select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+    .otf-field.full-width {
+      grid-column: 1 / -1;
+    }
+    .rest-message {
+      text-align: center;
+      padding: 16px 0;
+      font-size: 15px;
+      color: var(--text2);
+      font-weight: 400;
+      line-height: 1.6;
+    }
+    .rest-emoji {
+      font-size: 32px;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    /* ── Drag Handles ──────────────────────────────── */
+    .drag-handle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 44px;
+      flex-shrink: 0;
+      cursor: grab;
+      color: var(--text3);
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      margin-right: 4px;
+    }
+    .drag-handle:active { cursor: grabbing; }
+    .drag-handle svg { width: 18px; height: 18px; }
+    .ex-drag-handle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 38px;
+      flex-shrink: 0;
+      cursor: grab;
+      color: var(--text3);
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      margin-left: -2px;
+      margin-right: 4px;
+    }
+    .ex-drag-handle:active { cursor: grabbing; }
+    .ex-drag-handle svg { width: 14px; height: 14px; }
+
+    /* ── Drag States ────────────────────────────────── */
+    .day-card.dragging { opacity: 0.4; transform: scale(0.97); }
+    .exercise-block.dragging { opacity: 0.3; }
+
+    /* Collapse all cards during day reorder */
+    .reordering-days .day-card .day-content {
+      max-height: 0 !important;
+      opacity: 0 !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+      transition: max-height 0.25s var(--ease), opacity 0.15s var(--ease), padding 0.25s var(--ease);
+    }
+    .reordering-days .day-card {
+      margin-bottom: 8px;
+    }
+    .reordering-days .day-card .completed-tag { display: none !important; }
+    .drag-indicator {
+      height: 3px;
+      background: var(--accent);
+      border-radius: 2px;
+      margin: -1.5px 0;
+      pointer-events: none;
+      animation: pulseBar 0.8s ease infinite alternate;
+    }
+    @keyframes pulseBar {
+      from { opacity: 0.6; }
+      to { opacity: 1; }
+    }
+    .drag-ghost {
+      position: fixed;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0.9;
+      transform: scale(1.03) rotate(1.5deg);
+      box-shadow: var(--shadow-lg);
+      border-radius: var(--radius);
+      background: var(--card);
+      overflow: hidden;
+      transition: none;
+    }
+
+    /* ── Exercise Block wrapper ─────────────────────── */
+    .exercise-block {
+      transition: opacity 0.2s var(--ease);
+    }
+
+    /* ── Stretch Swap Picker ────────────────────────── */
+    .swap-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 300;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .swap-overlay.open { display: flex; animation: fadeIn 0.2s var(--ease); }
+    .swap-card {
+      background: var(--card);
+      border-radius: 20px 20px 0 0;
+      padding: 8px 20px calc(20px + var(--safe-bottom));
+      width: 100%;
+      max-height: 70dvh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+      animation: slideUp 0.35s var(--ease);
+    }
+    .swap-handle {
+      width: 36px;
+      height: 5px;
+      background: var(--text3);
+      border-radius: 3px;
+      margin: 8px auto 14px;
+      opacity: 0.4;
+    }
+    .swap-title {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .swap-subtitle {
+      font-size: 13px;
+      color: var(--text2);
+      margin-bottom: 14px;
+    }
+    .swap-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 12px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 6px;
+      cursor: pointer;
+      transition: background 0.15s var(--ease);
+      border: 1.5px solid transparent;
+    }
+    .swap-option:active { transform: scale(0.98); }
+    .swap-option.selected {
+      background: var(--green-soft);
+      border-color: var(--green);
+    }
+    .swap-option-name {
+      font-size: 15px;
+      font-weight: 500;
+    }
+    .swap-option-dur {
+      font-size: 13px;
+      color: var(--text2);
+      font-weight: 500;
+    }
+    .swap-option .swap-check {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid var(--text3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s var(--spring);
+    }
+    .swap-option.selected .swap-check {
+      background: var(--green);
+      border-color: var(--green);
+    }
+    .swap-option.selected .swap-check svg { opacity: 1; }
+    .swap-option .swap-check svg { opacity: 0; width: 12px; height: 12px; transition: opacity 0.15s; }
+
+    /* ── Settings Tabs ─────────────────────────────── */
+    .settings-tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 14px;
+      border-radius: var(--radius-sm);
+      background: var(--input-bg);
+      padding: 3px;
+    }
+    .settings-tab {
+      flex: 1;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      background: transparent;
+      color: var(--text2);
+      padding: 8px 0;
+      border-radius: calc(var(--radius-sm) - 2px);
+      cursor: pointer;
+      transition: all 0.2s var(--ease);
+    }
+    .settings-tab.active {
+      background: var(--card);
+      color: var(--text);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .stretch-swap-btn {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 1.5px solid var(--text3);
+      background: transparent;
+      color: var(--text3);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      padding: 0;
+      line-height: 1;
+      transition: all 0.15s;
+      margin-left: 8px;
+    }
+    .stretch-swap-btn:active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    @media (min-width: 641px) {
+      .swap-overlay { align-items: center; padding: 24px; }
+      .swap-card { max-width: 400px; border-radius: 20px; padding: 24px; }
+      .swap-handle { display: none; }
+    }
+
+    /* ── Desktop Breakpoint ─────────────────────────── */
+    @media (min-width: 641px) {
+      .container { max-width: 600px; margin: 0 auto; padding: 0 20px; }
+      .nav-inner { max-width: 600px; margin: 0 auto; }
+      .page-title { font-size: 34px; padding: 28px 0 18px; }
+      .day-name { font-size: 17px; }
+      .exercise-name { font-size: 15px; }
+      .prescription { font-size: 14px; min-width: 60px; }
+      .weight-input { width: 80px; height: 38px; }
+      .modal-overlay { align-items: center; padding: 24px; }
+      .modal-card {
+        max-width: 480px;
+        border-radius: 20px;
+        padding: 24px;
+        animation: none;
+      }
+      .modal-handle { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Nav Bar ──────────────────────────────────── -->
+  <nav class="nav-bar">
+    <div class="nav-inner">
+      <select id="weekSelector" class="week-selector"></select>
+      <div class="nav-btns">
+        <button class="nav-btn" id="navInfoBtn" aria-label="Week progression info">ⓘ</button>
+        <button class="nav-btn" id="navSettingsBtn" aria-label="Settings">⚙</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Modal ────────────────────────────────────── -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-card">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <span class="modal-title" id="modalTitle">Week 1</span>
+        <button class="modal-close" id="modalClose">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- ── Stretch Swap Picker ────────────────────── -->
+  <div class="swap-overlay" id="swapOverlay">
+    <div class="swap-card">
+      <div class="swap-handle"></div>
+      <div class="swap-title" id="swapTitle">Pick a Stretch</div>
+      <div class="swap-subtitle" id="swapSubtitle">Targets the same muscle group</div>
+      <div id="swapOptions"></div>
+    </div>
+  </div>
+
+  <!-- ── Settings Modal ──────────────────────── -->
+  <div class="swap-overlay" id="settingsOverlay">
+    <div class="swap-card">
+      <div class="swap-handle"></div>
+      <div class="swap-title">⚙ Settings</div>
+      <div class="settings-tabs">
+        <button class="settings-tab active" data-stab="profile">Profile</button>
+        <button class="settings-tab" data-stab="barbell">Barbell Calc</button>
+        <button class="settings-tab" data-stab="reset">Reset</button>
+      </div>
+      <div class="settings-tab-content" id="settingsTabProfile">
+        <div class="swap-subtitle">Personalize your workout plan</div>
+        <div style="padding:14px 0">
+          <label style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:6px">First Name</label>
+          <input type="text" id="settingsName" class="weight-input" style="width:100%;text-align:left;padding:0 12px;font-size:16px" placeholder="Enter your name" autocomplete="given-name">
+        </div>
+      </div>
+      <div class="settings-tab-content" id="settingsTabBarbell" style="display:none">
+        <div class="swap-subtitle">Toggle which exercises show the plate calculator</div>
+        <div id="settingsList"></div>
+      </div>
+      <div class="settings-tab-content" id="settingsTabReset" style="display:none">
+        <div class="swap-subtitle">This will erase all saved weights, reps, stretch picks, day order, and barbell settings.</div>
+        <div style="padding:24px 0;text-align:center">
+          <button class="reset-btn" id="masterResetBtn">Reset All Data</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Main Content ─────────────────────────────── -->
+  <div class="container">
+    <h1 class="page-title" id="pageTitle">Workout Plan.</h1>
+    <div id="programContainer"></div>
+  </div>
+
+  <script>
+    /* ══════════════════════════════════════════════════
+       1. PROGRAM DATA
+    ══════════════════════════════════════════════════ */
+
+    /* ── Stretch alternatives (3 options per slot) ── */
+    const STRETCH_ALTS = {
+      // Monday slots
+      'mon_0': {
+        target: 'Chest',
+        options: [
+          { id: 'door_chest',   name: 'Doorway Chest Stretch',        dur: '30s/side' },
+          { id: 'floor_angel',  name: 'Floor Angel (Snow Angel)',     dur: '60s' },
+          { id: 'fly_hold',     name: 'Lying DB Fly Stretch (hold)',  dur: '30s' },
+        ]
+      },
+      'mon_1': {
+        target: 'T-Spine',
+        options: [
+          { id: 'bench_thor',   name: 'Bench Thoracic Extension',     dur: '60s' },
+          { id: 'foam_tspine',  name: 'Foam Roller T-Spine Extension',dur: '60s' },
+          { id: 'open_book',    name: 'Open Book Stretch',            dur: '30s/side' },
+        ]
+      },
+      'mon_2': {
+        target: 'Triceps',
+        options: [
+          { id: 'oh_tri_str',   name: 'Overhead Tricep Stretch',      dur: '60s' },
+          { id: 'towel_tri',    name: 'Towel Behind-the-Back Stretch',dur: '30s/side' },
+          { id: 'wall_tri',     name: 'Wall Tricep Stretch',          dur: '30s/side' },
+        ]
+      },
+      'mon_3': {
+        target: 'Neck / Traps',
+        options: [
+          { id: 'neck_trap',    name: 'Neck Side Stretch & Trap Release', dur: '30s/side' },
+          { id: 'door_trap',    name: 'Upper Trap Doorframe Stretch', dur: '30s/side' },
+          { id: 'lev_scap',     name: 'Levator Scapulae Stretch',     dur: '30s/side' },
+        ]
+      },
+      'mon_4': {
+        target: 'Shoulder',
+        options: [
+          { id: 'cross_body',   name: 'Cross-Body Shoulder Stretch',  dur: '60s' },
+          { id: 'sleeper',      name: 'Sleeper Stretch (side-lying)', dur: '30s/side' },
+          { id: 'thread_needle',name: 'Thread the Needle',            dur: '30s/side' },
+        ]
+      },
+      // Tuesday slots
+      'tue_0': {
+        target: 'Hip Flexors',
+        options: [
+          { id: 'deep_lunge',   name: 'Deep Lunge Stretch',           dur: '120s' },
+          { id: 'hk_hip',       name: 'Half-Kneeling Hip Flexor Stretch', dur: '60s/side' },
+          { id: 'couch_str',    name: 'Couch Stretch',                dur: '60s/side' },
+        ]
+      },
+      'tue_1': {
+        target: 'Glutes',
+        options: [
+          { id: 'fig4',         name: 'Seated Figure-4 Stretch',      dur: '60s' },
+          { id: 'pigeon',       name: 'Pigeon Pose',                  dur: '60s/side' },
+          { id: 'supine_knee',  name: 'Supine Knee-to-Chest Cross',   dur: '30s/side' },
+        ]
+      },
+      'tue_2': {
+        target: 'Quads',
+        options: [
+          { id: 'quad_stand',   name: 'Standing Quad Stretch',        dur: '30s/side' },
+          { id: 'couch_q',      name: 'Couch Stretch',                dur: '60s/side' },
+          { id: 'side_quad',    name: 'Side-Lying Quad Stretch',      dur: '30s/side' },
+        ]
+      },
+      'tue_3': {
+        target: 'Decompression',
+        options: [
+          { id: 'child_center', name: 'Child\'s Pose Center',        dur: '60s' },
+          { id: 'mckenzie',     name: 'Prone Press-Up (McKenzie)',    dur: '60s' },
+          { id: 'dead_hang',    name: 'Dead Hang from Bar',           dur: '30s' },
+        ]
+      },
+      // Thursday slots
+      'thu_0': {
+        target: 'Spinal Rotation',
+        options: [
+          { id: 'spinal_twist', name: 'Seated Spinal Twist',          dur: '60s' },
+          { id: 'supine_twist', name: 'Supine Spinal Twist (lying)',  dur: '30s/side' },
+          { id: 'open_book_t',  name: 'Open Book Stretch',            dur: '30s/side' },
+        ]
+      },
+      'thu_1': {
+        target: 'Spine Mobility',
+        options: [
+          { id: 'cat_cow',      name: 'Cat-Cow Spinal Flow',          dur: '60s' },
+          { id: 'quad_tspine',  name: 'Quadruped T-Spine Rotation',   dur: '30s/side' },
+          { id: 'foam_angel',   name: 'Foam Roller Snow Angel',       dur: '60s' },
+        ]
+      },
+      'thu_2': {
+        target: 'Forearms',
+        options: [
+          { id: 'wrist_flex',   name: 'Kneeling Wrist Flexor Stretch',dur: '60s' },
+          { id: 'rev_prayer',   name: 'Reverse Prayer Stretch',       dur: '60s' },
+          { id: 'desk_press',   name: 'Fingers-Down Desk Press',      dur: '30s' },
+        ]
+      },
+      'thu_3': {
+        target: 'Lats',
+        options: [
+          { id: 'oh_lat',       name: 'Overhead Lat Stretch',         dur: '60s' },
+          { id: 'dead_hang_l',  name: 'Dead Hang from Pull-Up Bar',   dur: '30-60s' },
+          { id: 'child_ext',    name: 'Child\'s Pose Arms Extended',  dur: '60s' },
+        ]
+      },
+      'thu_4': {
+        target: 'Scapula',
+        options: [
+          { id: 'prone_scap',   name: 'Prone Scapular Decompression', dur: '60s' },
+          { id: 'wall_slide',   name: 'Wall Slides (Y-W pattern)',    dur: '60s' },
+          { id: 'foam_pec',     name: 'Foam Roller Pec/Scap Release', dur: '60s' },
+        ]
+      },
+      // Friday slots
+      'fri_0': {
+        target: 'Hamstrings',
+        options: [
+          { id: 'ham_hinge',    name: 'Standing Hamstring Hinge',     dur: '60s' },
+          { id: 'supine_ham',   name: 'Supine Strap Hamstring Stretch',dur: '30s/side' },
+          { id: 'seated_fold',  name: 'Seated Forward Fold',          dur: '60s' },
+        ]
+      },
+      'fri_1': {
+        target: 'Calves',
+        options: [
+          { id: 'calf_wall',    name: 'Wall Calf Stretch',            dur: '60s' },
+          { id: 'step_drop',    name: 'Step Drop Calf Stretch',       dur: '60s' },
+          { id: 'down_dog',     name: 'Downward Dog',                 dur: '60s' },
+        ]
+      },
+      'fri_2': {
+        target: 'Obliques',
+        options: [
+          { id: 'oh_side_bend', name: 'Standing Overhead Side Bends', dur: '60s' },
+          { id: 'seat_side',    name: 'Seated Side Bend',             dur: '30s/side' },
+          { id: 'lying_reach',  name: 'Lying Side-Lying Reach Over',  dur: '30s/side' },
+        ]
+      },
+      'fri_3': {
+        target: 'Full Body',
+        options: [
+          { id: 'wgs',          name: 'World\'s Greatest Stretch',   dur: '60s' },
+          { id: 'bretzel',      name: 'Bretzel Stretch',              dur: '30s/side' },
+          { id: 'hip_flow',     name: '90/90 Hip Flow + OH Reach',    dur: '60s' },
+        ]
+      },
+      'fri_4': {
+        target: 'Lower Back',
+        options: [
+          { id: 'sphinx',       name: 'Sphinx Pose',                  dur: '60s' },
+          { id: 'mckenzie_f',   name: 'Prone Press-Up (McKenzie)',    dur: '60s' },
+          { id: 'cobra_f',      name: 'Cobra Pose',                   dur: '60s' },
+        ]
+      }
+    };
+
+    /* ── Stretches per day (defaults, overridden by user picks) ── */
+    const STRETCH_MON = [
+      { id: 'door_chest',   name: 'Doorway Chest Stretch',         dur: '30s/side' },
+      { id: 'bench_thor',   name: 'Bench Thoracic Extension',      dur: '60s' },
+      { id: 'oh_tri_str',   name: 'Overhead Tricep Stretch',       dur: '60s' },
+      { id: 'neck_trap',    name: 'Neck Side Stretch & Trap Release', dur: '30s/side' },
+      { id: 'cross_body',   name: 'Cross-Body Shoulder Stretch',   dur: '60s' },
+    ];
+
+    const STRETCH_TUE = [
+      { id: 'deep_lunge',   name: 'Deep Lunge Stretch',            dur: '120s' },
+      { id: 'fig4',         name: 'Seated Figure-4 Stretch',       dur: '60s' },
+      { id: 'quad_stand',   name: 'Standing Quad Stretch',         dur: '30s/side' },
+      { id: 'child_center', name: 'Child\'s Pose Center',          dur: '60s' },
+    ];
+
+    const STRETCH_THU = [
+      { id: 'spinal_twist', name: 'Seated Spinal Twist',           dur: '60s' },
+      { id: 'cat_cow',      name: 'Cat-Cow Spinal Flow',           dur: '60s' },
+      { id: 'wrist_flex',   name: 'Kneeling Wrist Flexor Stretch', dur: '60s' },
+      { id: 'oh_lat',       name: 'Overhead Lat Stretch',          dur: '60s' },
+      { id: 'prone_scap',   name: 'Prone Scapular Decompression',  dur: '60s' },
+    ];
+
+    const STRETCH_FRI = [
+      { id: 'ham_hinge',    name: 'Standing Hamstring Hinge',      dur: '60s' },
+      { id: 'calf_wall',    name: 'Wall Calf Stretch',             dur: '60s' },
+      { id: 'oh_side_bend', name: 'Standing Overhead Side Bends',  dur: '60s' },
+      { id: 'wgs',          name: 'World\'s Greatest Stretch',     dur: '60s' },
+      { id: 'sphinx',       name: 'Sphinx Pose',                   dur: '60s' },
+    ];
+
+    const PROGRAM = [
+      {
+        id: 'mon',
+        name: 'Monday — Upper Push',
+        subtitle: 'Chest, Shoulders, Triceps',
+        exercises: [
+          { id: 'bench',      name: 'Bench Press',                sets: 3, reps: '6-8',    barbell: true },
+          { id: 'ohp',        name: 'Overhead Press',             sets: 3, reps: '6-8',    barbell: true },
+          { id: 'incline_db', name: 'Incline DB Press',           sets: 3, reps: '8-10'   },
+          { id: 'lat_raise',  name: 'Lateral Raises',             sets: 3, reps: '12-14'  },
+          { id: 'oh_tri',     name: 'Overhead Tricep Extension',  sets: 3, reps: '10-12'  },
+          { id: 'ext_rot',    name: 'External Rotations',         sets: 2, reps: '15-17/side' },
+        ],
+        mobility: STRETCH_MON
+      },
+      {
+        id: 'tue',
+        name: 'Tuesday — Lower A',
+        subtitle: 'Quads, Glutes, Hips',
+        exercises: [
+          { id: 'squat',      name: 'Back Squat',                sets: 3, reps: '6-8',    barbell: true },
+          { id: 'hip_thrust', name: 'Hip Thrust',                sets: 3, reps: '6-8',    barbell: true },
+          { id: 'leg_ext',    name: 'Leg Extensions',            sets: 3, reps: '12-15'  },
+          { id: 'hip_abd',    name: 'Hip Abduction Machine',     sets: 3, reps: '12-15'  },
+        ],
+        mobility: STRETCH_TUE
+      },
+      {
+        id: 'wed',
+        name: 'Wednesday — Conditioning',
+        subtitle: 'VO2 Max Engine',
+        type: 'otf'
+      },
+      {
+        id: 'thu',
+        name: 'Thursday — Upper Pull',
+        subtitle: 'Back, Rear Delts, Biceps',
+        exercises: [
+          { id: 'pullup',     name: 'Pull-Ups',                  sets: 3, reps: '8-10'   },
+          { id: 'row',        name: 'Barbell Rows',              sets: 3, reps: '8-10',   barbell: true },
+          { id: 'shrug',      name: 'Barbell Shrugs',            sets: 3, reps: '12-14',  barbell: true },
+          { id: 'face_pull',  name: 'Face Pulls',                sets: 3, reps: '12-14'  },
+          { id: 'inc_curl',   name: 'Incline DB Curl',           sets: 3, reps: '10-12'  },
+        ],
+        mobility: STRETCH_THU
+      },
+      {
+        id: 'fri',
+        name: 'Friday — Lower B + Core',
+        subtitle: 'Hamstrings, Calves, Core',
+        exercises: [
+          { id: 'rdl',        name: 'Romanian Deadlift',         sets: 3, reps: '6-8',    barbell: true },
+          { id: 'back_ext',   name: 'Weighted Back Extensions',  sets: 3, reps: '10-12'  },
+          { id: 'calf_stand', name: 'Standing Calf Raise',       sets: 3, reps: '12-15'  },
+          { id: 'hang_leg',   name: 'Hanging Leg Raise',         sets: 3, reps: '12-14'  },
+          { id: 'plank',      name: 'Plank',                     sets: 3, reps: '45s holds' },
+          { id: 'woodchop',   name: 'Woodchoppers',              sets: 2, reps: '12-14/side' },
+        ],
+        mobility: STRETCH_FRI
+      },
+      {
+        id: 'sat',
+        name: 'Saturday — Rest',
+        subtitle: '',
+        type: 'rest'
+      },
+      {
+        id: 'sun',
+        name: 'Sunday — Rest',
+        subtitle: '',
+        type: 'rest'
+      }
+    ];
+
+    /* ══════════════════════════════════════════════════
+       2. WEEK PROGRESSION RULES
+    ══════════════════════════════════════════════════ */
+    const WEEK_RULES = {
+      1:  'Use low end of rep range.',
+      2:  'Add +1 rep per set.',
+      3:  'Add +1 rep per set.',
+      4:  'Hit top of rep range.',
+      5:  'Drop to low reps. Add +5 lbs (Upper) / +10 lbs (Lower).',
+      6:  'Add +1 rep per set.',
+      7:  'Drop to low reps. Add +5 lbs (Upper) / +10 lbs (Lower).',
+      8:  'Hit top of rep range.',
+      9:  'Stay at top of range.',
+      10: 'Stay at top of range.',
+      11: 'Stay at top of range.',
+      12: 'Recovery Block — Cut reps in half. Reduce weight by 40%.'
+    };
+
+    const CYCLE_RESTART = `<strong>Cycle Restart Rule:</strong><br>1. Go back to Week 1 style training.<br>2. Start a little heavier than you did at the very beginning (Week 1 of last cycle).`;
+
+    const PLATES = [
+      { label: '45s', weight: 45 },
+      { label: '25s', weight: 25 },
+      { label: '10s', weight: 10 },
+      { label: '5s',  weight: 5 },
+      { label: '2.5s',weight: 2.5 }
+    ];
+
+    /* ══════════════════════════════════════════════════
+       3. STORAGE HELPERS
+    ══════════════════════════════════════════════════ */
+    const LS = {
+      set(key, val) { try { localStorage.setItem('wo_' + key, JSON.stringify(val)); } catch(e) {} },
+      get(key, fallback) {
+        try {
+          const v = localStorage.getItem('wo_' + key);
+          return v !== null ? JSON.parse(v) : fallback;
+        } catch(e) { return fallback; }
+      },
+      clearAll() {
+        const keys = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith('wo_')) keys.push(k);
+        }
+        keys.forEach(k => localStorage.removeItem(k));
+      }
+    };
+
+    /* ══════════════════════════════════════════════════
+       4. RENDER FUNCTIONS
+    ══════════════════════════════════════════════════ */
+    function renderWeekSelector() {
+      const sel = document.getElementById('weekSelector');
+      for (let w = 1; w <= 12; w++) {
+        const opt = document.createElement('option');
+        opt.value = w;
+        opt.textContent = `Week ${w}` + (w === 12 ? ' (Recovery)' : '');
+        sel.appendChild(opt);
+      }
+      sel.value = LS.get('week', 1);
+      sel.addEventListener('change', () => {
+        LS.set('week', parseInt(sel.value));
+      });
+    }
+
+    function buildCalcPanel(dayId, exId) {
+      const uid = `${dayId}_${exId}`;
+      return `
+        <div class="calc-panel" id="calc_${uid}">
+          <div class="calc-title">Barbell Calculator</div>
+          <div class="calc-row">
+            <span class="calc-label">Bar</span>
+            <select class="calc-select" id="calcBar_${uid}">
+              <option value="15">15 lbs</option>
+              <option value="25">25 lbs</option>
+              <option value="45" selected>45 lbs</option>
+            </select>
+          </div>
+          <div class="calc-row">
+            <span class="calc-label" style="width:100%;margin-bottom:2px;">Plates per side:</span>
+          </div>
+          <div class="calc-row">
+            ${PLATES.map(p => `
+              <div class="plate-group">
+                <span class="plate-label">${p.label}</span>
+                <input type="number" class="calc-input" id="calcPlate_${uid}_${p.weight}" min="0" value="0" inputmode="numeric" data-weight="${p.weight}">
+              </div>
+            `).join('')}
+          </div>
+          <div class="calc-footer">
+            <span class="calc-total" id="calcTotal_${uid}">Total: 0 lbs</span>
+            <button class="calc-apply-btn" data-uid="${uid}">Apply</button>
+          </div>
+        </div>`;
+    }
+
+    function getActiveStretches(dayId, defaults) {
+      if (!defaults || !defaults.length) return [];
+      return defaults.map((def, i) => {
+        const key = `${dayId}_${i}`;
+        const saved = LS.get(`strPick_${key}`, null);
+        if (!saved) return def;
+        const alts = STRETCH_ALTS[key];
+        if (!alts) return def;
+        const found = alts.options.find(o => o.id === saved);
+        return found || def;
+      });
+    }
+
+    const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+    function getDayDisplayName(day, posIndex) {
+      const label = day.name.includes('—') ? day.name.split('—')[1].trim() : day.name;
+      return `${DAY_NAMES[posIndex]} — ${label}`;
+    }
+
+    function hasBarbell(dayId, exId) {
+      const uid = `${dayId}_${exId}`;
+      const saved = LS.get('barbellExercises', null);
+      if (saved && uid in saved) return saved[uid];
+      // fall back to program default
+      for (const day of PROGRAM) {
+        if (day.id === dayId && day.exercises) {
+          const ex = day.exercises.find(e => e.id === exId);
+          return ex ? !!ex.barbell : false;
+        }
+      }
+      return false;
+    }
+
+    function getAllExercises() {
+      const list = [];
+      PROGRAM.forEach(day => {
+        if (!day.exercises) return;
+        day.exercises.forEach(ex => {
+          list.push({ dayId: day.id, dayName: day.name.split(' \u2014 ')[0], ex });
+        });
+      });
+      return list;
+    }
+
+    function parseReps(reps) {
+      const m = String(reps).match(/^(\d+)(?:\s*-\s*(\d+))?(.*)?$/);
+      if (!m) return { min: 0, max: 0, suffix: '' };
+      return { min: parseInt(m[1]), max: m[2] ? parseInt(m[2]) : parseInt(m[1]), suffix: (m[3] || '').trim() };
+    }
+
+    function getDisplaySets(uid, ex) {
+      const saved = LS.get(`reps_${uid}`, null);
+      return saved && saved.sets ? saved.sets : ex.sets;
+    }
+
+    function getDisplayReps(uid, ex) {
+      const saved = LS.get(`reps_${uid}`, null);
+      if (!saved) return ex.reps;
+      const def = parseReps(ex.reps);
+      const suffix = def.suffix ? ' ' + def.suffix : (saved.suffix || '');
+      if (saved.min === saved.max) return `${saved.min}${suffix}`;
+      return `${saved.min}-${saved.max}${suffix}`;
+    }
+
+    function buildRepPanel(uid, ex) {
+      const def = parseReps(ex.reps);
+      const saved = LS.get(`reps_${uid}`, null);
+      const sets = saved && saved.sets ? saved.sets : ex.sets;
+      const min = saved ? saved.min : def.min;
+      const max = saved ? saved.max : def.max;
+      const suffix = def.suffix ? ` <span class="rep-panel-suffix">${def.suffix}</span>` : '';
+      return `
+        <div class="rep-panel" id="reppanel_${uid}">
+          <div class="rep-panel-row">
+            <span class="rep-panel-label">Sets</span>
+            <input type="number" class="rep-input" data-repsets="${uid}" value="${sets}" min="1" max="20" inputmode="numeric">
+            <span class="rep-panel-label">Min</span>
+            <input type="number" class="rep-input" data-repmin="${uid}" value="${min}" min="1" max="99" inputmode="numeric">
+            <span class="rep-panel-label">Max</span>
+            <input type="number" class="rep-input" data-repmax="${uid}" value="${max}" min="1" max="99" inputmode="numeric">${suffix}
+            <button class="rep-reset-btn" data-represet="${uid}" data-defmin="${def.min}" data-defmax="${def.max}" data-defsets="${ex.sets}">Reset</button>
+          </div>
+        </div>`;
+    }
+
+    function renderMobility(dayId, moves) {
+      if (!moves || !moves.length) return '';
+      const active = getActiveStretches(dayId, moves);
+      return `
+        <div class="section-divider"><span>Stretches</span></div>
+        ${active.map((m, i) => {
+          const uid = `${dayId}_mob_${m.id}`;
+          const checked = LS.get(`mob_${uid}`, false);
+          const altKey = `${dayId}_${i}`;
+          const hasAlts = !!STRETCH_ALTS[altKey];
+          return `
+          <div class="mobility-row">
+            <label class="mobility-check">
+              <input type="checkbox" data-mob="${uid}" ${checked ? 'checked' : ''}>
+              <span class="m-box">
+                <svg viewBox="0 0 14 14" fill="none"><path d="M2.5 7.5L5.5 10.5L11.5 3.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </label>
+            <span class="mobility-name">${m.name}</span>
+            <span class="mobility-dur">${m.dur}</span>
+            ${hasAlts ? `<button class="stretch-swap-btn" data-swapkey="${altKey}" data-dayid="${dayId}" aria-label="Swap stretch">⇅</button>` : ''}
+          </div>`;
+        }).join('')}`;
+    }
+
+    function renderOTF(dayId) {
+      return `
+        <div class="rest-message">
+          Orangetheory VO2 Max<br>55-minute studio class.
+        </div>`;
+    }
+
+    function renderRest(dayId, name) {
+      return `
+        <div class="rest-message">
+          Rest day — No exercises or stretches.
+        </div>`;
+    }
+
+    const GRIP_SVG = '<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="5.5" cy="3.5" r="1.2"/><circle cx="10.5" cy="3.5" r="1.2"/><circle cx="5.5" cy="8" r="1.2"/><circle cx="10.5" cy="8" r="1.2"/><circle cx="5.5" cy="12.5" r="1.2"/><circle cx="10.5" cy="12.5" r="1.2"/></svg>';
+
+    function getOrderedProgram() {
+      const dayOrder = LS.get('dayOrder', null);
+      if (!dayOrder) return PROGRAM;
+      const map = {};
+      PROGRAM.forEach(d => map[d.id] = d);
+      const ordered = dayOrder.filter(id => map[id]).map(id => map[id]);
+      PROGRAM.forEach(d => { if (!dayOrder.includes(d.id)) ordered.push(d); });
+      return ordered;
+    }
+
+    function getOrderedExercises(day) {
+      if (!day.exercises) return [];
+      const saved = LS.get(`exOrder_${day.id}`, null);
+      if (!saved) return day.exercises;
+      const map = {};
+      day.exercises.forEach(e => map[e.id] = e);
+      const ordered = saved.filter(id => map[id]).map(id => map[id]);
+      day.exercises.forEach(e => { if (!saved.includes(e.id)) ordered.push(e); });
+      return ordered;
+    }
+
+    function renderProgram() {
+      const container = document.getElementById('programContainer');
+      const ordered = getOrderedProgram();
+      container.innerHTML = ordered.map((day, posIdx) => {
+        const checked = LS.get(`checked_${day.id}`, false);
+        const cardClass = day.type === 'otf' ? ' otf-card' : (day.type === 'rest' ? ' rest-card' : '');
+        const displayName = getDayDisplayName(day, posIdx);
+
+        let content = '';
+        if (day.type === 'otf') {
+          content = renderOTF(day.id);
+        } else if (day.type === 'rest') {
+          content = renderRest(day.id, day.name);
+        } else {
+          const exercises = getOrderedExercises(day);
+          content = '<div class="exercises-list" data-day="' + day.id + '">' +
+            exercises.map(ex => {
+              const uid = `${day.id}_${ex.id}`;
+              const savedWeight = LS.get(`wt_${uid}`, '');
+              const displayReps = getDisplayReps(uid, ex);
+              const isBB = hasBarbell(day.id, ex.id);
+              return `
+              <div class="exercise-block" data-exid="${ex.id}">
+                <div class="exercise-row">
+                  <div class="ex-drag-handle" data-exhandle="${day.id}">${GRIP_SVG}</div>
+                  <div class="exercise-left">
+                    <span class="exercise-name">${ex.name}</span>
+                    ${isBB ? `<button class="exercise-info-btn" data-calc="${uid}" aria-label="Open calculator">ⓘ</button>` : ''}
+                  </div>
+                  <div class="exercise-right">
+                    <span class="prescription">${getDisplaySets(uid, ex)} × ${displayReps}</span>
+                    <input type="number" class="weight-input" id="wt_${uid}" placeholder="lbs" inputmode="decimal" step="any" value="${savedWeight}" data-uid="${uid}">
+                    <button class="rep-settings-btn" data-repuid="${uid}" aria-label="Edit reps">⚙</button>
+                  </div>
+                </div>
+                ${buildRepPanel(uid, ex)}
+                ${isBB ? buildCalcPanel(day.id, ex.id) : ''}
+              </div>`;
+            }).join('') + '</div>' + renderMobility(day.id, day.mobility);
+        }
+
+        const isTraining = !day.type;
+
+        return `
+        <div class="day-card${checked && isTraining ? ' completed' : ''}${cardClass}" id="card_${day.id}" data-dayid="${day.id}">
+          <div class="day-header">
+            <div class="drag-handle" data-dayhandle="${day.id}">${GRIP_SVG}</div>
+            <div class="day-header-left">
+              <span class="day-name">${displayName}</span>
+              ${day.subtitle ? `<span class="day-subtitle">${day.subtitle}</span>` : ''}
+              ${isTraining ? '<span class="completed-tag">Completed ✓</span>' : ''}
+            </div>
+            ${isTraining ? `<label class="check-circle">
+              <input type="checkbox" data-day="${day.id}" ${checked ? 'checked' : ''}>
+              <span class="circle">
+                <svg viewBox="0 0 14 14" fill="none"><path d="M2.5 7.5L5.5 10.5L11.5 3.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </label>` : ''}
+          </div>
+          <div class="day-content">
+            ${content}
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    /* ══════════════════════════════════════════════════
+       5. EVENT HANDLERS
+    ══════════════════════════════════════════════════ */
+    function attachEvents() {
+      // ── Weight inputs: save on change ──
+      document.querySelectorAll('.weight-input').forEach(inp => {
+        inp.addEventListener('input', () => {
+          LS.set(`wt_${inp.dataset.uid}`, inp.value);
+        });
+      });
+
+      // ── Mobility checkboxes: save on change ──
+      document.querySelectorAll('.mobility-check input').forEach(cb => {
+        cb.addEventListener('change', () => {
+          LS.set(`mob_${cb.dataset.mob}`, cb.checked);
+          const nameEl = cb.closest('.mobility-row').querySelector('.mobility-name');
+          if (nameEl) {
+            nameEl.style.color = cb.checked ? 'var(--text3)' : '';
+            nameEl.style.textDecoration = cb.checked ? 'line-through' : '';
+          }
+        });
+      });
+
+      // ── OTF inputs: save on change ──
+      document.querySelectorAll('[data-otf]').forEach(inp => {
+        inp.addEventListener('input', () => {
+          LS.set(`otf_${inp.dataset.otf}`, inp.value);
+        });
+      });
+
+      // ── Stretch swap buttons: open picker ──
+      document.querySelectorAll('.stretch-swap-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openSwapPicker(btn.dataset.swapkey, btn.dataset.dayid);
+        });
+      });
+
+      // ── Swap overlay close ──
+      document.getElementById('swapOverlay').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) closeSwapPicker();
+      });
+
+      // ── Day checkboxes: collapse/expand ──
+      document.querySelectorAll('.check-circle input').forEach(cb => {
+        cb.addEventListener('change', () => {
+          const card = document.getElementById(`card_${cb.dataset.day}`);
+          if (cb.checked) {
+            card.classList.add('completed');
+          } else {
+            card.classList.remove('completed');
+          }
+          LS.set(`checked_${cb.dataset.day}`, cb.checked);
+        });
+      });
+
+      // ── Exercise info buttons: toggle calculator ──
+      document.querySelectorAll('.exercise-info-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const panel = document.getElementById(`calc_${btn.dataset.calc}`);
+          if (panel) panel.classList.toggle('open');
+        });
+      });
+
+      // ── Rep settings gear buttons: toggle rep panel ──
+      document.querySelectorAll('.rep-settings-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const panel = document.getElementById(`reppanel_${btn.dataset.repuid}`);
+          if (panel) panel.classList.toggle('open');
+        });
+      });
+
+      // ── Rep settings inputs: save on change ──
+      function updatePrescription(uid, block) {
+        const setsEl = block.querySelector(`[data-repsets="${uid}"]`);
+        const minEl = block.querySelector(`[data-repmin="${uid}"]`);
+        const maxEl = block.querySelector(`[data-repmax="${uid}"]`);
+        const setsV = parseInt(setsEl.value) || 1;
+        const minV = parseInt(minEl.value) || 1;
+        const maxV = parseInt(maxEl.value) || minV;
+        LS.set(`reps_${uid}`, { sets: setsV, min: minV, max: maxV });
+        const exBlock = block.closest('.exercise-block');
+        const presEl = exBlock.querySelector('.prescription');
+        if (presEl) {
+          const origParts = presEl.textContent.split('×')[1];
+          const suffixMatch = origParts ? origParts.trim().match(/\d+(?:\s*-\s*\d+)?(.*)/) : null;
+          const sfx = suffixMatch && suffixMatch[1] ? suffixMatch[1].trim() : '';
+          const repStr = minV === maxV ? `${minV}` : `${minV}-${maxV}`;
+          presEl.textContent = `${setsV} × ${repStr}${sfx ? ' ' + sfx : ''}`;
+        }
+      }
+
+      document.querySelectorAll('.rep-input').forEach(inp => {
+        inp.addEventListener('input', () => {
+          const uid = inp.dataset.repsets || inp.dataset.repmin || inp.dataset.repmax;
+          const block = inp.closest('.rep-panel');
+          updatePrescription(uid, block);
+        });
+      });
+
+      // ── Rep reset buttons ──
+      document.querySelectorAll('.rep-reset-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const uid = btn.dataset.represet;
+          LS.set(`reps_${uid}`, null);
+          const block = btn.closest('.rep-panel');
+          block.querySelector(`[data-repsets="${uid}"]`).value = btn.dataset.defsets;
+          block.querySelector(`[data-repmin="${uid}"]`).value = btn.dataset.defmin;
+          block.querySelector(`[data-repmax="${uid}"]`).value = btn.dataset.defmax;
+          const exBlock = block.closest('.exercise-block');
+          const presEl = exBlock.querySelector('.prescription');
+          if (presEl) {
+            const origParts = presEl.textContent.split('×')[1];
+            const suffixMatch = origParts ? origParts.trim().match(/\d+(?:\s*-\s*\d+)?(.*)/) : null;
+            const sfx = suffixMatch && suffixMatch[1] ? suffixMatch[1].trim() : '';
+            const s = btn.dataset.defsets, m = btn.dataset.defmin, x = btn.dataset.defmax;
+            const repStr = m === x ? m : `${m}-${x}`;
+            presEl.textContent = `${s} × ${repStr}${sfx ? ' ' + sfx : ''}`;
+          }
+        });
+      });
+
+      // ── Calculator Apply buttons ──
+      document.querySelectorAll('.calc-apply-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const uid = btn.dataset.uid;
+          const total = calcTotal(uid);
+          const input = document.getElementById(`wt_${uid}`);
+          if (input) {
+            input.value = total;
+            LS.set(`wt_${uid}`, total.toString());
+          }
+        });
+      });
+
+      // ── Calculator live total update ──
+      document.querySelectorAll('.calc-input, .calc-select').forEach(el => {
+        el.addEventListener('input', () => {
+          const panel = el.closest('.calc-panel');
+          if (panel) {
+            const uid = panel.id.replace('calc_', '');
+            updateCalcDisplay(uid);
+          }
+        });
+        el.addEventListener('change', () => {
+          const panel = el.closest('.calc-panel');
+          if (panel) {
+            const uid = panel.id.replace('calc_', '');
+            updateCalcDisplay(uid);
+          }
+        });
+      });
+
+      // ── Nav info button: open modal ──
+      document.getElementById('navInfoBtn').addEventListener('click', openInfoModal);
+
+      // ── Settings button ──
+      document.getElementById('navSettingsBtn').addEventListener('click', openSettings);
+      document.getElementById('settingsOverlay').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) closeSettings();
+      });
+
+      // ── Modal close ──
+      document.getElementById('modalClose').addEventListener('click', closeModal);
+      document.getElementById('modalOverlay').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) closeModal();
+      });
+
+      // ── Master reset (now in settings) ──
+      document.getElementById('masterResetBtn').addEventListener('click', () => {
+        if (confirm('Are you sure you want to reset ALL workout data? This cannot be undone.')) {
+          LS.clearAll();
+          location.reload();
+        }
+      });
+
+      // ── Settings tabs ──
+      const tabIds = { profile: 'settingsTabProfile', barbell: 'settingsTabBarbell', reset: 'settingsTabReset' };
+      document.querySelectorAll('.settings-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          Object.entries(tabIds).forEach(([key, id]) => {
+            document.getElementById(id).style.display = tab.dataset.stab === key ? '' : 'none';
+          });
+        });
+      });
+
+      // ── Profile name input ──
+      const nameInput = document.getElementById('settingsName');
+      nameInput.value = LS.get('userName', '');
+      nameInput.addEventListener('input', () => {
+        LS.set('userName', nameInput.value);
+        updatePageTitle();
+      });
+    }
+
+    /* ══════════════════════════════════════════════════
+       6. CALCULATOR LOGIC
+    ══════════════════════════════════════════════════ */
+    function calcTotal(uid) {
+      const barSel = document.getElementById(`calcBar_${uid}`);
+      const barWeight = barSel ? parseFloat(barSel.value) : 45;
+      let sidePlates = 0;
+      PLATES.forEach(p => {
+        const inp = document.getElementById(`calcPlate_${uid}_${p.weight}`);
+        const qty = inp ? (parseInt(inp.value) || 0) : 0;
+        sidePlates += qty * p.weight;
+      });
+      return barWeight + (2 * sidePlates);
+    }
+
+    function updateCalcDisplay(uid) {
+      const totalEl = document.getElementById(`calcTotal_${uid}`);
+      if (totalEl) {
+        totalEl.textContent = `Total: ${calcTotal(uid)} lbs`;
+      }
+    }
+
+    /* ══════════════════════════════════════════════════
+       7. MODAL LOGIC
+    ══════════════════════════════════════════════════ */
+    function openInfoModal() {
+      const week = parseInt(document.getElementById('weekSelector').value);
+      document.getElementById('modalTitle').textContent = `Week ${week}${week === 12 ? ' (Recovery Block)' : ''}`;
+
+      const instruction = WEEK_RULES[week] || '';
+      document.getElementById('modalBody').innerHTML = `
+        <div class="week-instruction">${instruction}</div>
+        <div class="cycle-rule">${CYCLE_RESTART}</div>
+      `;
+      document.getElementById('modalOverlay').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('open');
+    }
+
+    /* ══════════════════════════════════════════════════
+       7b. STRETCH SWAP PICKER
+    ══════════════════════════════════════════════════ */
+    let _swapKey = null;
+    let _swapDayId = null;
+
+    function openSwapPicker(key, dayId) {
+      _swapKey = key;
+      _swapDayId = dayId;
+      const alt = STRETCH_ALTS[key];
+      if (!alt) return;
+      const currentId = LS.get(`strPick_${key}`, alt.options[0].id);
+      document.getElementById('swapTitle').textContent = alt.target;
+      document.getElementById('swapSubtitle').textContent = 'Pick your preferred stretch';
+      const container = document.getElementById('swapOptions');
+      container.innerHTML = alt.options.map(opt => `
+        <div class="swap-option ${opt.id === currentId ? 'selected' : ''}" data-optid="${opt.id}">
+          <div>
+            <div class="swap-option-name">${opt.name}</div>
+            <div class="swap-option-dur">${opt.dur}</div>
+          </div>
+          <div class="swap-check">
+            <svg viewBox="0 0 14 14" fill="none"><path d="M2.5 7.5L5.5 10.5L11.5 3.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+      `).join('');
+      container.querySelectorAll('.swap-option').forEach(el => {
+        el.addEventListener('click', () => {
+          LS.set(`strPick_${_swapKey}`, el.dataset.optid);
+          closeSwapPicker();
+          renderProgram();
+          attachEvents();
+        });
+      });
+      document.getElementById('swapOverlay').classList.add('open');
+    }
+
+    function closeSwapPicker() {
+      document.getElementById('swapOverlay').classList.remove('open');
+      _swapKey = null;
+      _swapDayId = null;
+    }
+
+    /* ══════════════════════════════════════════════════
+       7c. SETTINGS (Barbell Calculator Toggles)
+    ══════════════════════════════════════════════════ */
+    function openSettings() {
+      const allEx = getAllExercises();
+      const saved = LS.get('barbellExercises', {});
+      const container = document.getElementById('settingsList');
+      let currentDay = '';
+      container.innerHTML = allEx.map(({ dayId, dayName, ex }) => {
+        const uid = `${dayId}_${ex.id}`;
+        const isOn = uid in saved ? saved[uid] : !!ex.barbell;
+        const header = dayId !== currentDay ? (() => { currentDay = dayId; return `<div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.8px;margin:14px 0 6px;${dayId === allEx[0].dayId ? 'margin-top:4px' : ''}">${dayName}</div>`; })() : '';
+        return `${header}
+        <label class="swap-option" style="cursor:pointer;user-select:none">
+          <div>
+            <div class="swap-option-name">${ex.name}</div>
+          </div>
+          <div class="settings-toggle">
+            <input type="checkbox" data-bbuid="${uid}" ${isOn ? 'checked' : ''}>
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          </div>
+        </label>`;
+      }).join('');
+      container.querySelectorAll('[data-bbuid]').forEach(cb => {
+        cb.addEventListener('change', () => {
+          const s = LS.get('barbellExercises', {});
+          s[cb.dataset.bbuid] = cb.checked;
+          LS.set('barbellExercises', s);
+        });
+      });
+      document.getElementById('settingsOverlay').classList.add('open');
+    }
+
+    function closeSettings() {
+      document.getElementById('settingsOverlay').classList.remove('open');
+      renderProgram();
+      attachEvents();
+    }
+
+    /* ══════════════════════════════════════════════════
+       8. DRAG & DROP
+    ══════════════════════════════════════════════════ */
+    (function() {
+      let dragState = null;
+
+      function getCenter(el) {
+        const r = el.getBoundingClientRect();
+        return r.top + r.height / 2;
+      }
+
+      function createGhost(el, x, y, compact) {
+        const ghost = document.createElement('div');
+        ghost.classList.add('drag-ghost');
+        const rect = el.getBoundingClientRect();
+        if (compact) {
+          // Day drag: just show a small pill with the day name
+          const name = el.querySelector('.day-name');
+          ghost.textContent = name ? name.textContent : '';
+          ghost.style.padding = '10px 20px';
+          ghost.style.fontSize = '15px';
+          ghost.style.fontWeight = '600';
+          ghost.style.fontFamily = 'var(--font)';
+          ghost.style.color = 'var(--text)';
+          ghost.style.width = 'auto';
+          ghost.style.maxWidth = '260px';
+          ghost.style.whiteSpace = 'nowrap';
+          ghost.style.overflow = 'hidden';
+          ghost.style.textOverflow = 'ellipsis';
+          ghost.style.borderRadius = '12px';
+          ghost.style.left = (x - 100) + 'px';
+        } else {
+          const clone = el.cloneNode(true);
+          ghost.appendChild(clone);
+          ghost.style.width = rect.width + 'px';
+          ghost.style.left = (x - rect.width / 2) + 'px';
+        }
+        ghost.style.top = (y - 24) + 'px';
+        document.body.appendChild(ghost);
+        return ghost;
+      }
+
+      function removeIndicators() {
+        document.querySelectorAll('.drag-indicator').forEach(el => el.remove());
+      }
+
+      // ── Day Dragging ──
+      function startDayDrag(dayCard, x, y) {
+        dayCard.classList.add('dragging');
+        document.getElementById('programContainer').classList.add('reordering-days');
+        dragState = {
+          type: 'day',
+          el: dayCard,
+          ghost: createGhost(dayCard, x, y, true),
+          dayId: dayCard.dataset.dayid
+        };
+      }
+
+      function moveDayDrag(x, y) {
+        const { ghost, el } = dragState;
+        ghost.style.left = (x - 100) + 'px';
+        ghost.style.top = (y - 24) + 'px';
+        removeIndicators();
+        const container = document.getElementById('programContainer');
+        const cards = [...container.querySelectorAll('.day-card:not(.dragging)')];
+        let insertBefore = null;
+        for (const card of cards) {
+          if (y < getCenter(card)) { insertBefore = card; break; }
+        }
+        const indicator = document.createElement('div');
+        indicator.className = 'drag-indicator';
+        if (insertBefore) {
+          container.insertBefore(indicator, insertBefore);
+        } else {
+          container.appendChild(indicator);
+        }
+      }
+
+      function endDayDrag(y) {
+        const { el, ghost, dayId } = dragState;
+        el.classList.remove('dragging');
+        ghost.remove();
+        removeIndicators();
+        document.getElementById('programContainer').classList.remove('reordering-days');
+        const container = document.getElementById('programContainer');
+        const cards = [...container.querySelectorAll('.day-card')];
+        let insertBefore = null;
+        for (const card of cards) {
+          if (card === el) continue;
+          if (y < getCenter(card)) { insertBefore = card; break; }
+        }
+        if (insertBefore && insertBefore !== el) {
+          container.insertBefore(el, insertBefore);
+        } else if (!insertBefore) {
+          container.appendChild(el);
+        }
+        // Save new order
+        const newOrder = [...container.querySelectorAll('.day-card')].map(c => c.dataset.dayid);
+        LS.set('dayOrder', newOrder);
+        dragState = null;
+        // Re-render to update position-based day names
+        renderProgram();
+        attachEvents();
+      }
+
+      // ── Exercise Dragging ──
+      function startExDrag(block, x, y) {
+        block.classList.add('dragging');
+        dragState = {
+          type: 'exercise',
+          el: block,
+          ghost: createGhost(block, x, y, false),
+          dayId: block.closest('.exercises-list').dataset.day
+        };
+      }
+
+      function moveExDrag(x, y) {
+        const { ghost, el } = dragState;
+        ghost.style.left = (x - parseInt(ghost.style.width) / 2) + 'px';
+        ghost.style.top = (y - 20) + 'px';
+        removeIndicators();
+        const list = el.closest('.exercises-list');
+        const blocks = [...list.querySelectorAll('.exercise-block:not(.dragging)')];
+        let insertBefore = null;
+        for (const b of blocks) {
+          if (y < getCenter(b)) { insertBefore = b; break; }
+        }
+        const indicator = document.createElement('div');
+        indicator.className = 'drag-indicator';
+        if (insertBefore) {
+          list.insertBefore(indicator, insertBefore);
+        } else {
+          list.appendChild(indicator);
+        }
+      }
+
+      function endExDrag(y) {
+        const { el, ghost, dayId } = dragState;
+        el.classList.remove('dragging');
+        ghost.remove();
+        removeIndicators();
+        const list = el.closest('.exercises-list');
+        const blocks = [...list.querySelectorAll('.exercise-block')];
+        let insertBefore = null;
+        for (const b of blocks) {
+          if (b === el) continue;
+          if (y < getCenter(b)) { insertBefore = b; break; }
+        }
+        if (insertBefore && insertBefore !== el) {
+          list.insertBefore(el, insertBefore);
+        } else if (!insertBefore) {
+          list.appendChild(el);
+        }
+        const newOrder = [...list.querySelectorAll('.exercise-block')].map(b => b.dataset.exid);
+        LS.set(`exOrder_${dayId}`, newOrder);
+        dragState = null;
+      }
+
+      // ── Unified Pointer Handlers ──
+      function onPointerDown(e) {
+        const dayHandle = e.target.closest('[data-dayhandle]');
+        const exHandle = e.target.closest('[data-exhandle]');
+        if (!dayHandle && !exHandle) return;
+        e.preventDefault();
+        const px = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+        const py = e.clientY || (e.touches && e.touches[0].clientY) || 0;
+        if (dayHandle) {
+          const card = dayHandle.closest('.day-card');
+          startDayDrag(card, px, py);
+        } else if (exHandle) {
+          const block = exHandle.closest('.exercise-block');
+          startExDrag(block, px, py);
+        }
+      }
+
+      function onPointerMove(e) {
+        if (!dragState) return;
+        e.preventDefault();
+        const py = e.clientY || (e.touches && e.touches[0].clientY) || 0;
+        const px = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+        if (dragState.type === 'day') moveDayDrag(px, py);
+        else moveExDrag(px, py);
+        // Auto-scroll near edges
+        if (py < 80) window.scrollBy(0, -8);
+        else if (py > window.innerHeight - 80) window.scrollBy(0, 8);
+      }
+
+      function onPointerUp(e) {
+        if (!dragState) return;
+        e.preventDefault();
+        const py = e.clientY || (e.changedTouches && e.changedTouches[0].clientY) || 0;
+        if (dragState.type === 'day') endDayDrag(py);
+        else endExDrag(py);
+      }
+
+      document.addEventListener('pointerdown', onPointerDown, { passive: false });
+      document.addEventListener('pointermove', onPointerMove, { passive: false });
+      document.addEventListener('pointerup', onPointerUp, { passive: false });
+      document.addEventListener('pointercancel', () => {
+        if (dragState) {
+          dragState.el.classList.remove('dragging');
+          dragState.ghost.remove();
+          removeIndicators();
+          document.getElementById('programContainer').classList.remove('reordering-days');
+          dragState = null;
+        }
+      });
+      // Prevent context menu on long press of handles
+      document.addEventListener('contextmenu', (e) => {
+        if (e.target.closest('[data-dayhandle]') || e.target.closest('[data-exhandle]')) {
+          e.preventDefault();
+        }
+      });
+    })();
+
+    /* ══════════════════════════════════════════════════
+       9. INIT
+    ══════════════════════════════════════════════════ */
+    function updatePageTitle() {
+      const name = LS.get('userName', '');
+      const titleEl = document.getElementById('pageTitle');
+      titleEl.textContent = name ? `${name}'s Workout Plan.` : 'Workout Plan.';
+    }
+
+    function init() {
+      renderWeekSelector();
+      renderProgram();
+      attachEvents();
+      updatePageTitle();
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+
+</body>
+</html>
