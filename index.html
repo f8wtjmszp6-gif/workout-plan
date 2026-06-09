@@ -304,9 +304,7 @@
       font-size: 15px;
       font-weight: 400;
       letter-spacing: -0.1px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      word-break: break-word;
     }
     .exercise-info-btn {
       width: 24px;
@@ -344,13 +342,14 @@
       border: 1.5px solid var(--text3);
       background: transparent;
       color: var(--text3);
-      font-size: 12px;
+      font-size: 14px;
+      font-weight: 700;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      padding: 0;
+      padding: 0 0 3px 0;
       line-height: 1;
       transition: all 0.15s;
       margin-left: 2px;
@@ -367,7 +366,7 @@
       padding: 0 14px;
     }
     .rep-panel.open {
-      max-height: 120px;
+      max-height: 500px;
       opacity: 1;
       padding: 10px 14px;
       margin: 4px 0 6px;
@@ -1481,37 +1480,6 @@
       });
     }
 
-    function buildCalcPanel(dayId, exId) {
-      const uid = `${dayId}_${exId}`;
-      return `
-        <div class="calc-panel" id="calc_${uid}">
-          <div class="calc-title">Barbell Calculator</div>
-          <div class="calc-row">
-            <span class="calc-label">Bar</span>
-            <select class="calc-select" id="calcBar_${uid}">
-              <option value="15">15 lbs</option>
-              <option value="25">25 lbs</option>
-              <option value="45" selected>45 lbs</option>
-            </select>
-          </div>
-          <div class="calc-row">
-            <span class="calc-label" style="width:100%;margin-bottom:2px;">Plates per side:</span>
-          </div>
-          <div class="calc-row">
-            ${PLATES.map(p => `
-              <div class="plate-group">
-                <span class="plate-label">${p.label}</span>
-                <input type="number" class="calc-input" id="calcPlate_${uid}_${p.weight}" min="0" value="0" inputmode="numeric" data-weight="${p.weight}">
-              </div>
-            `).join('')}
-          </div>
-          <div class="calc-footer">
-            <span class="calc-total" id="calcTotal_${uid}">Total: 0 lbs</span>
-            <button class="calc-apply-btn" data-uid="${uid}">Apply</button>
-          </div>
-        </div>`;
-    }
-
     function getActiveStretches(dayId, defaults) {
       if (!defaults || !defaults.length) return [];
       return defaults.map((def, i) => {
@@ -1577,13 +1545,40 @@
       return `${saved.min}-${saved.max}${suffix}`;
     }
 
-    function buildRepPanel(uid, ex) {
+    function buildRepPanel(uid, ex, isBB) {
       const def = parseReps(ex.reps);
       const saved = LS.get(`reps_${uid}`, null);
       const sets = saved && saved.sets ? saved.sets : ex.sets;
       const min = saved ? saved.min : def.min;
       const max = saved ? saved.max : def.max;
       const suffix = def.suffix ? ` <span class="rep-panel-suffix">${def.suffix}</span>` : '';
+      const calcSection = isBB ? `
+          <div style="border-top:0.5px solid var(--border);margin:10px 0 8px;padding-top:10px">
+            <div class="calc-title">Barbell Calculator</div>
+            <div class="calc-row">
+              <span class="calc-label">Bar</span>
+              <select class="calc-select" id="calcBar_${uid}">
+                <option value="15">15 lbs</option>
+                <option value="25">25 lbs</option>
+                <option value="45" selected>45 lbs</option>
+              </select>
+            </div>
+            <div class="calc-row">
+              <span class="calc-label" style="width:100%;margin-bottom:2px;">Plates per side:</span>
+            </div>
+            <div class="calc-row">
+              ${PLATES.map(p => `
+                <div class="plate-group">
+                  <span class="plate-label">${p.label}</span>
+                  <input type="number" class="calc-input" id="calcPlate_${uid}_${p.weight}" min="0" value="0" inputmode="numeric" data-weight="${p.weight}">
+                </div>
+              `).join('')}
+            </div>
+            <div class="calc-footer">
+              <span class="calc-total" id="calcTotal_${uid}">Total: 0 lbs</span>
+              <button class="calc-apply-btn" data-uid="${uid}">Apply</button>
+            </div>
+          </div>` : '';
       return `
         <div class="rep-panel" id="reppanel_${uid}">
           <div class="rep-panel-row">
@@ -1594,7 +1589,7 @@
             <span class="rep-panel-label">Max</span>
             <input type="number" class="rep-input" data-repmax="${uid}" value="${max}" min="1" max="99" inputmode="numeric">${suffix}
             <button class="rep-reset-btn" data-represet="${uid}" data-defmin="${def.min}" data-defmax="${def.max}" data-defsets="${ex.sets}">Reset</button>
-          </div>
+          </div>${calcSection}
         </div>`;
     }
 
@@ -1687,16 +1682,14 @@
                   <div class="ex-drag-handle" data-exhandle="${day.id}">${GRIP_SVG}</div>
                   <div class="exercise-left">
                     <span class="exercise-name">${ex.name}</span>
-                    ${isBB ? `<button class="exercise-info-btn" data-calc="${uid}" aria-label="Open calculator">ⓘ</button>` : ''}
                   </div>
                   <div class="exercise-right">
                     <span class="prescription">${getDisplaySets(uid, ex)} × ${displayReps}</span>
                     <input type="number" class="weight-input" id="wt_${uid}" placeholder="lbs" inputmode="decimal" step="any" value="${savedWeight}" data-uid="${uid}">
-                    <button class="rep-settings-btn" data-repuid="${uid}" aria-label="Edit reps">⚙</button>
+                    <button class="rep-settings-btn" data-repuid="${uid}" aria-label="Edit reps">⋯</button>
                   </div>
                 </div>
-                ${buildRepPanel(uid, ex)}
-                ${isBB ? buildCalcPanel(day.id, ex.id) : ''}
+                ${buildRepPanel(uid, ex, isBB)}
               </div>`;
             }).join('') + '</div>' + renderMobility(day.id, day.mobility);
         }
@@ -1782,14 +1775,6 @@
         });
       });
 
-      // ── Exercise info buttons: toggle calculator ──
-      document.querySelectorAll('.exercise-info-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const panel = document.getElementById(`calc_${btn.dataset.calc}`);
-          if (panel) panel.classList.toggle('open');
-        });
-      });
-
       // ── Rep settings gear buttons: toggle rep panel ──
       document.querySelectorAll('.rep-settings-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1864,16 +1849,16 @@
       // ── Calculator live total update ──
       document.querySelectorAll('.calc-input, .calc-select').forEach(el => {
         el.addEventListener('input', () => {
-          const panel = el.closest('.calc-panel');
+          const panel = el.closest('.rep-panel');
           if (panel) {
-            const uid = panel.id.replace('calc_', '');
+            const uid = panel.id.replace('reppanel_', '');
             updateCalcDisplay(uid);
           }
         });
         el.addEventListener('change', () => {
-          const panel = el.closest('.calc-panel');
+          const panel = el.closest('.rep-panel');
           if (panel) {
-            const uid = panel.id.replace('calc_', '');
+            const uid = panel.id.replace('reppanel_', '');
             updateCalcDisplay(uid);
           }
         });
@@ -1958,10 +1943,12 @@
         <div class="cycle-rule">${CYCLE_RESTART}</div>
       `;
       document.getElementById('modalOverlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
     }
 
     function closeModal() {
       document.getElementById('modalOverlay').classList.remove('open');
+      document.body.style.overflow = '';
     }
 
     /* ══════════════════════════════════════════════════
@@ -1999,10 +1986,12 @@
         });
       });
       document.getElementById('swapOverlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
     }
 
     function closeSwapPicker() {
       document.getElementById('swapOverlay').classList.remove('open');
+      document.body.style.overflow = '';
       _swapKey = null;
       _swapDayId = null;
     }
@@ -2038,10 +2027,12 @@
         });
       });
       document.getElementById('settingsOverlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
     }
 
     function closeSettings() {
       document.getElementById('settingsOverlay').classList.remove('open');
+      document.body.style.overflow = '';
       renderProgram();
       attachEvents();
     }
